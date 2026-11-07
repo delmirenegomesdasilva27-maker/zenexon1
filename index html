@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenexon - Vitrine de Vendas</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen pb-20">
+
+    <!-- Header / Topo -->
+    <header class="sticky top-0 z-40 bg-gradient-to-r from-orange-600 to-amber-500 text-white shadow-md">
+        <div class="max-w-xl mx-auto px-4 py-3 space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center font-black text-lg">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-black text-lg tracking-tight leading-none">Zenexon</h1>
+                        <span class="text-[9px] text-amber-100 font-bold">R$ 10,00/mês por anúncio</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="shareApp()" class="bg-white/20 hover:bg-white/30 text-white p-2 rounded-xl text-xs font-black shadow-sm active:scale-95 transition-all" title="Compartilhar App">
+                        <i class="fa-solid fa-share-nodes text-sm"></i>
+                    </button>
+                    <button onclick="openPublishModal()" class="bg-white text-orange-600 px-3 py-1.5 rounded-xl text-xs font-black shadow-sm active:scale-95 transition-all flex items-center space-x-1">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Anunciar</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Campo de Busca -->
+            <div class="relative">
+                <input type="text" id="search-input" onkeyup="renderProducts()" placeholder="Buscar produtos no Zenexon..." class="w-full bg-white text-slate-800 placeholder-slate-400 pl-10 pr-4 py-2 rounded-xl text-xs outline-none shadow-inner">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-slate-400 text-xs"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Categorias -->
+    <div class="bg-white border-b border-slate-200 overflow-x-auto hide-scrollbar">
+        <div class="max-w-xl mx-auto px-4 py-2.5 flex space-x-2 shrink-0">
+            <button onclick="filterCategory('Todos')" class="cat-btn px-4 py-1.5 rounded-full text-xs font-bold bg-orange-600 text-white shrink-0 transition-all shadow-sm">Todos</button>
+            <button onclick="filterCategory('Achadinhos')" class="cat-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 shrink-0 transition-all">🔥 Achadinhos</button>
+            <button onclick="filterCategory('Casa & Cozinha')" class="cat-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 shrink-0 transition-all">🏠 Casa & Cozinha</button>
+            <button onclick="filterCategory('Moda')" class="cat-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 shrink-0 transition-all">👕 Moda</button>
+            <button onclick="filterCategory('Eletrônicos')" class="cat-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 shrink-0 transition-all">📱 Eletrônicos</button>
+        </div>
+    </div>
+
+    <!-- Feed de Produtos -->
+    <main class="max-w-xl mx-auto p-3">
+        <div class="grid grid-cols-2 gap-3" id="products-grid">
+            <!-- Cards entram aqui -->
+        </div>
+    </main>
+
+    <!-- Modal de Publicação -->
+    <div id="publish-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-extrabold text-slate-800 text-base">Anunciar no Zenexon (R$ 10/mês)</h3>
+                <button onclick="closePublishModal()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form id="publish-form" onsubmit="handlePublishProduct(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Título do Produto</label>
+                    <input type="text" id="prod-title" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-orange-500 outline-none" placeholder="Ex: Mini Processador Manual">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Preço do Produto (R$)</label>
+                        <input type="text" id="prod-price" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-orange-500 outline-none" placeholder="Ex: 29,90">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Categoria</label>
+                        <select id="prod-category" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-orange-500 outline-none bg-white">
+                            <option value="Achadinhos">Achadinhos</option>
+                            <option value="Casa & Cozinha">Casa & Cozinha</option>
+                            <option value="Moda">Moda</option>
+                            <option value="Eletrônicos">Eletrônicos</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Link de Vendas / Afiliado (Shopee, Amazon...)</label>
+                    <input type="url" id="prod-url" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-orange-500 outline-none" placeholder="https://shope.ee/...">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Link da Foto do Produto</label>
+                    <input type="url" id="prod-img" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-orange-500 outline-none" placeholder="https://...">
+                </div>
+                
+                <!-- Pagamento Mercado Pago -->
+                <div class="bg-orange-50 p-4 rounded-xl border border-orange-200 space-y-3 text-xs">
+                    <div class="flex justify-between items-center font-bold text-orange-900">
+                        <span>Assinatura Mensal Zenexon</span>
+                        <span class="text-sm text-orange-600 font-black">R$ 10,00 / mês</span>
+                    </div>
+                    <p class="text-[11px] text-orange-800 leading-tight">Para ativar seu anúncio por 30 dias na plataforma, conclua o pagamento de R$ 10,00 pelo Mercado Pago:</p>
+                    
+                    <a href="https://mpago.la/1DQZTbX" target="_blank" class="w-full py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold flex items-center justify-center space-x-2 shadow-md transition-all">
+                        <i class="fa-solid fa-credit-card"></i>
+                        <span>Pagar R$ 10,00 no Mercado Pago</span>
+                    </a>
+                </div>
+
+                <div class="bg-slate-50 p-2.5 rounded-xl text-[10px] text-slate-500">
+                    <i class="fa-solid fa-shield-halved text-slate-400"></i> Permitido qualquer produto legítimo. Proibido conteúdo adulto ou drogas.
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-orange-600 to-amber-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-orange-500/20 active:scale-98">Concluir Anúncio</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        // Configuração pública básica para sincronização local e nuvem
+        const firebaseConfig = {
+            apiKey: "AIzaSyDemoConfigZenexonKey2026",
+            authDomain: "zenexon-app.firebaseapp.com",
+            projectId: "zenexon-app",
+            storageBucket: "zenexon-app.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:zenexon"
+        };
+        
+        // Inicializa o Firebase se disponível ou grava localmente no dispositivo
+        let db = null;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+        } catch(e) {
+            console.log("Modo offline ativado");
+        }
+
+        let products = [
+            {
+                id: "1",
+                title: "Kit Potes Herméticos de Cozinha",
+                price: "49,90",
+                category: "Casa & Cozinha",
+                image: "https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=400&q=80",
+                link: "https://shopee.com.br"
+            },
+            {
+                id: "2",
+                title: "Mini Umidificador de Ar LED USB",
+                price: "24,99",
+                category: "Achadinhos",
+                image: "https://images.unsplash.com/photo-1545127398-14699f92334b?w=400&q=80",
+                link: "https://shopee.com.br"
+            }
+        ];
+
+        let currentCategory = 'Todos';
+
+        function loadLocalProducts() {
+            const saved = localStorage.getItem('zenexon_products');
+            if(saved) {
+                try { products = JSON.parse(saved); } catch(e){}
+            }
+        }
+
+        function saveLocalProducts() {
+            localStorage.setItem('zenexon_products', JSON.stringify(products));
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            const searchVal = document.getElementById('search-input').value.toLowerCase();
+            grid.innerHTML = '';
+
+            const filtered = products.filter(p => {
+                const matchCat = currentCategory === 'Todos' || p.category === currentCategory;
+                const matchSearch = p.title.toLowerCase().includes(searchVal);
+                return matchCat && matchSearch;
+            });
+
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-2 text-center py-12 text-slate-400 text-xs">Nenhum produto encontrado no momento.</div>`;
+                return;
+            }
+
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="relative aspect-square w-full bg-slate-100 overflow-hidden">
+                            <img src="${p.image}" alt="${p.title}" class="w-full h-full object-cover">
+                            <span class="absolute top-2 left-2 bg-orange-600 text-white px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wide">${p.category}</span>
+                            <button onclick="shareProduct('${p.title}', '${p.link}')" class="absolute top-2 right-2 w-7 h-7 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-slate-700 shadow-sm active:scale-95">
+                                <i class="fa-solid fa-share-nodes text-[11px]"></i>
+                            </button>
+                        </div>
+                        <div class="p-2.5">
+                            <h3 class="text-xs font-bold text-slate-800 line-clamp-2 leading-tight">${p.title}</h3>
+                        </div>
+                    </div>
+                    <div class="p-2.5 pt-0 space-y-2">
+                        <div class="flex items-baseline space-x-1">
+                            <span class="text-[10px] text-orange-600 font-extrabold">R$</span>
+                            <span class="text-base font-black text-orange-600">${p.price}</span>
+                        </div>
+                        <a href="${p.link}" target="_blank" class="w-full py-2 bg-gradient-to-r from-orange-600 to-amber-500 text-white rounded-xl text-[11px] font-extrabold flex items-center justify-center space-x-1 shadow-md shadow-orange-500/20 active:scale-95 transition-all">
+                            <span>Comprar</span>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                if(btn.textContent.includes(cat) || (cat === 'Todos' && btn.textContent === 'Todos')) {
+                    btn.className = "cat-btn px-4 py-1.5 rounded-full text-xs font-bold bg-orange-600 text-white shrink-0 transition-all shadow-sm";
+                } else {
+                    btn.className = "cat-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 shrink-0 transition-all";
+                }
+            });
+            renderProducts();
+        }
+
+        function openPublishModal() { document.getElementById('publish-modal').classList.remove('hidden'); }
+        function closePublishModal() { document.getElementById('publish-modal').classList.add('hidden'); }
+
+        function shareApp() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Zenexon - Vitrine de Vendas',
+                    text: 'Confira as ofertas e produtos anunciados no Zenexon!',
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert("Link do aplicativo Zenexon copiado!");
+            }
+        }
+
+        function shareProduct(title, link) {
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    text: `Confira esse produto no Zenexon: ${title}`,
+                    url: link
+                });
+            } else {
+                navigator.clipboard.writeText(link);
+                alert("Link do produto copiado!");
+            }
+        }
+
+        function handlePublishProduct(e) {
+            e.preventDefault();
+            const newProd = {
+                id: String(Date.now()),
+                title: document.getElementById('prod-title').value,
+                price: document.getElementById('prod-price').value,
+                category: document.getElementById('prod-category').value,
+                link: document.getElementById('prod-url').value,
+                image: document.getElementById('prod-img').value
+            };
+            
+            products.unshift(newProd);
+            saveLocalProducts();
+            
+            if(db) {
+                db.collection("products").doc(newProd.id).set(newProd).catch(err => console.log(err));
+            }
+
+            closePublishModal();
+            document.getElementById('publish-form').reset();
+            renderProducts();
+            alert("Anúncio cadastrado com sucesso no Zenexon!");
+        }
+
+        loadLocalProducts();
+        renderProducts();
+    </script>
+</body>
+</html>
